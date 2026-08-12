@@ -82,7 +82,9 @@ export default function PasswordGate({ children }) {
 
         <p className="text-ink-soft text-sm leading-relaxed mb-8 max-w-[72ch] text-pretty reveal reveal-delay-3">
           A private workspace for SEPA, PUF, and selected members. Enter the
-          password to begin.
+          password to begin. Your progress saves automatically, but only in
+          this browser on this device, so start on the machine you intend to
+          finish on.
         </p>
 
         <form

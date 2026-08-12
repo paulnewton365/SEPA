@@ -326,3 +326,71 @@ textarea {
     animation: none !important;
   }
 }
+
+/* Spectrum sliders. The base input[type=range] rules above give a hairline
+   track; spectrum controls need to read as draggable at a glance, so they
+   get a thicker track, a filled left portion, and a larger thumb. The
+   unplaced state is deliberately lower contrast with a hollow thumb, so a
+   slider nobody has touched is visually distinct from one placed at the
+   midpoint. */
+.spectrum-range {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #15171a 0%,
+    #15171a var(--fill, 50%),
+    #d9d2c0 var(--fill, 50%),
+    #d9d2c0 100%
+  );
+  cursor: pointer;
+}
+
+.spectrum-range.is-unplaced {
+  background: repeating-linear-gradient(
+    to right,
+    #d9d2c0 0 6px,
+    transparent 6px 10px
+  );
+}
+
+.spectrum-range::-webkit-slider-thumb {
+  width: 26px;
+  height: 26px;
+  cursor: grab;
+}
+
+.spectrum-range::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  cursor: grab;
+}
+
+.spectrum-range.is-unplaced::-webkit-slider-thumb {
+  background: #f6f2e9;
+  border: 2px solid #9c9079;
+  box-shadow: 0 0 0 1px #9c9079;
+}
+
+.spectrum-range.is-unplaced::-moz-range-thumb {
+  background: #f6f2e9;
+  border: 2px solid #9c9079;
+  box-shadow: 0 0 0 1px #9c9079;
+}
+
+/* Gentle attention cue on an untouched slider, so it reads as an
+   outstanding action rather than a decorative rule. */
+@keyframes thumbBreathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.spectrum-range.is-unplaced:not(:hover)::-webkit-slider-thumb {
+  animation: thumbBreathe 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spectrum-range.is-unplaced:not(:hover)::-webkit-slider-thumb {
+    animation: none !important;
+  }
+}

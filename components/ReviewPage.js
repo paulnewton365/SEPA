@@ -129,8 +129,10 @@ export default function ReviewPage({
         <div className="mt-16 border-t border-rule pt-10 space-y-6">
           <div className="space-y-2 text-sm text-ink-soft leading-relaxed max-w-[58ch]">
             <p>
-              Your responses go to the Antenna Group strategy team. Nothing
-              is attributed to you by name in any findings readout.
+              Your responses go to the Antenna Group strategy team. Identifying
+              yourself is optional, and nothing is attributed to you by name in
+              any findings readout. Until you confirm below, your answers exist
+              only in this browser on this device.
             </p>
             <p>
               Questions, or anything you'd rather say in person:{" "}

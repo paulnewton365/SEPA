@@ -44,6 +44,8 @@ export default function Questionnaire() {
     () => new Set()
   );
   const [reviewing, setReviewing] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
+  const [savedForLater, setSavedForLater] = useState(false);
 
   const saveTimer = useRef(null);
   const sectionRefs = useRef({});
@@ -59,7 +61,13 @@ export default function Questionnaire() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const data = JSON.parse(raw);
-        if (data && typeof data === "object") setAnswers(data);
+        if (data && typeof data === "object") {
+          setAnswers(data);
+          // A draft with any real content means this person has been
+          // here before, so the welcome screen offers to resume rather
+          // than pretending it's a fresh start.
+          if (Object.keys(data).length > 0) setHasDraft(true);
+        }
       }
     } catch (e) {}
   }, []);
@@ -217,6 +225,20 @@ export default function Questionnaire() {
     }
   }
 
+  function handleSaveForLater() {
+    // The debounced autosave may still be pending, so flush it now
+    // rather than relying on the timer to fire before they navigate away.
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+      setSaved(true);
+    } catch (e) {}
+    setSavedForLater(true);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
   function handleStartReview() {
     setReviewing(true);
     if (typeof window !== "undefined") {
@@ -269,8 +291,23 @@ export default function Questionnaire() {
     return <ThankYou />;
   }
 
+  if (savedForLater) {
+    return (
+      <SavedForLater
+        percentComplete={percentComplete}
+        onResume={() => setSavedForLater(false)}
+      />
+    );
+  }
+
   if (!showForm) {
-    return <Welcome onBegin={() => setShowForm(true)} />;
+    return (
+      <Welcome
+        onBegin={() => setShowForm(true)}
+        hasDraft={hasDraft}
+        percentComplete={percentComplete}
+      />
+    );
   }
 
   if (reviewing) {
@@ -441,14 +478,28 @@ export default function Questionnaire() {
                   .
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={handleStartReview}
-                className="hover-lift inline-flex items-center gap-3 px-8 py-3.5 font-sans text-sm font-semibold uppercase tracking-[0.18em] bg-ink text-paper rounded-sm hover:bg-ink-soft"
-              >
-                <span>Review your answers</span>
-                <span className="nudge inline-block" aria-hidden>→</span>
-              </button>
+              <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+                <button
+                  type="button"
+                  onClick={handleStartReview}
+                  className="hover-lift inline-flex items-center gap-3 px-8 py-3.5 font-sans text-sm font-semibold uppercase tracking-[0.18em] bg-ink text-paper rounded-sm hover:bg-ink-soft"
+                >
+                  <span>Review your answers</span>
+                  <span className="nudge inline-block" aria-hidden>→</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveForLater}
+                  className="font-sans text-sm text-ink-muted hover:text-ink underline decoration-rule underline-offset-4 hover:decoration-ink transition-colors text-left"
+                >
+                  Save and finish later
+                </button>
+              </div>
+              <p className="text-ink-muted text-xs leading-relaxed max-w-[60ch]">
+                Saved answers live in this browser on this device. Come back to
+                the same link on the same machine and everything will be here.
+                They will not follow you to another device.
+              </p>
             </div>
           </div>
         </div>
@@ -457,7 +508,7 @@ export default function Questionnaire() {
   );
 }
 
-function Welcome({ onBegin }) {
+function Welcome({ onBegin, hasDraft, percentComplete }) {
   const [count, setCount] = useState(null);
 
   useEffect(() => {
@@ -531,7 +582,13 @@ function Welcome({ onBegin }) {
           </p>
           <p>
             Responses go to the Antenna Group strategy team and feed straight
-            into the Diagnose findings. Nothing is attributed to you by name.
+            into the Diagnose findings. Identifying yourself is optional.
+          </p>
+          <p>
+            You can stop and come back. Your answers save automatically as you
+            type, but they are stored in this browser on this device, so finish
+            on the same machine you start on. Opening the link on your phone
+            later will show a blank questionnaire.
           </p>
         </div>
 
@@ -546,18 +603,33 @@ function Welcome({ onBegin }) {
           />
           <MetaCell
             label="Progress"
-            value="Saved as you go"
+            value="Saved as you go, on this device and browser"
           />
         </div>
 
         <div className="mt-10 reveal reveal-delay-5 space-y-5">
-          <CountIndicator count={count} />
+          {hasDraft ? (
+            <div className="border border-rule-soft bg-paper-tint/40 rounded-sm px-5 py-4 max-w-md">
+              <p className="font-sans font-semibold text-[10px] uppercase tracking-[0.22em] text-ink-muted mb-2">
+                You've been here before
+              </p>
+              <p className="text-ink text-sm leading-relaxed">
+                Your answers are still saved in this browser
+                {typeof percentComplete === "number" && percentComplete > 0
+                  ? `, ${percentComplete}% complete`
+                  : ""}
+                . Pick up where you left off.
+              </p>
+            </div>
+          ) : (
+            <CountIndicator count={count} />
+          )}
           <button
             type="button"
             onClick={onBegin}
             className="hover-lift group inline-flex items-center gap-3 px-9 py-4 font-sans text-sm font-semibold uppercase tracking-[0.18em] bg-ink text-paper rounded-sm hover:bg-ink-soft"
           >
-            <span>Begin</span>
+            <span>{hasDraft ? "Continue" : "Begin"}</span>
             <span className="nudge inline-block" aria-hidden>→</span>
           </button>
         </div>
@@ -608,6 +680,70 @@ function CountIndicator({ count }) {
       <span className="font-bold text-ink tabular-nums">{count}</span>{" "}
       {count === 1 ? "voice" : "voices"} already on the record. Add yours.
     </p>
+  );
+}
+
+function SavedForLater({ percentComplete, onResume }) {
+  return (
+    <div className="min-h-screen px-6 lg:px-10 py-24 relative z-10">
+      <div className="max-w-2xl mx-auto">
+        <div className="mb-16 reveal reveal-delay-1 flex items-center gap-5">
+          <img
+            src="https://ktuyiikwhspwmzvyczit.supabase.co/storage/v1/object/public/assets/brand/antenna-new-logo.svg"
+            alt="Antenna Group"
+            className="h-12 w-auto"
+          />
+          <span className="h-8 w-px bg-rule" aria-hidden></span>
+          <p className="font-sans text-[11px] uppercase tracking-[0.22em] text-ink-muted leading-tight">
+            Strategy work<br />
+            by{" "}
+            <a
+              href="https://antennagroup.com"
+              target="_blank"
+              rel="noreferrer"
+              className="text-ink-soft hover:text-ink underline decoration-rule underline-offset-4 hover:decoration-ink transition-colors"
+            >
+              Antenna Group
+            </a>
+          </p>
+        </div>
+
+        <p className="font-sans font-semibold text-[11px] uppercase tracking-[0.22em] text-accent mb-6 reveal reveal-delay-2">
+          SEPA &nbsp;/&nbsp; Brand Foundation Study
+        </p>
+
+        <h1 className="font-display text-4xl md:text-5xl tracking-tightish text-ink leading-[1.05] mb-6 reveal reveal-delay-2 text-balance">
+          Saved. Come back when you're ready.
+        </h1>
+
+        <div className="space-y-4 text-ink-soft text-base leading-relaxed max-w-[68ch] text-pretty reveal reveal-delay-3">
+          <p>
+            You're {percentComplete}% through, and nothing is lost.
+          </p>
+          <p className="text-ink border-l-2 border-rule pl-4">
+            One thing worth knowing: your answers are stored in this browser on
+            this device. Return to the same link on the same machine and
+            everything will be where you left it. Opening the link somewhere
+            else, on a phone or another computer, will start you from scratch.
+          </p>
+          <p>
+            Nothing has been submitted yet. We only receive your responses
+            once you review and confirm them at the end.
+          </p>
+        </div>
+
+        <div className="mt-10 reveal reveal-delay-4">
+          <button
+            type="button"
+            onClick={onResume}
+            className="hover-lift inline-flex items-center gap-3 px-8 py-3.5 font-sans text-sm font-semibold uppercase tracking-[0.18em] bg-ink text-paper rounded-sm hover:bg-ink-soft"
+          >
+            <span>Keep going now</span>
+            <span className="nudge inline-block" aria-hidden>→</span>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

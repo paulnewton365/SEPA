@@ -49,7 +49,7 @@ The target Smartsheet is created and configured. No Smartsheet setup work remain
 - **Workspace:** CLIENT SURVEYS
 - **Direct link:** https://app.smartsheet.com/sheets/j5rhVxW4jmQWcgFH4vH8q8rJQVpg7hH56cXQF7J1
 
-All 49 columns are in place with the exact names this code expects: 5 metadata, 43 answer columns, and 1 catch-all JSON column. Respondent Name is the primary column, which is what the welcome-screen response counter reads. The section below is kept for reference, or for building a second sheet.
+All 45 columns are in place with the exact names this code expects: 4 metadata, 40 answer columns, and 1 catch-all JSON column. Respondent Name is the primary column, which is what the welcome-screen response counter reads. Identifying is optional for respondents, so when the name field is left blank the API writes "Anonymous" into that column rather than an empty cell, which keeps the counter accurate. The section below is kept for reference, or for building a second sheet.
 
 ## Smartsheet setup
 
@@ -67,9 +67,9 @@ Create a sheet before deploying. The integration looks columns up by name, so na
 
 ### Answer columns
 
-Vantage point · SEPA is a · What SEPA does · Said differently to a regulator · What would be lost · What SEPA does differently · Wish sentence · Reality sentence · What outsiders finally understand · Words that make them wince · What they say instead · What the name has earned · What the name has cost · One thing that survives a rename · Keep name to New name · What neutrality earns · Leading versus neutrality · Neutral convener to Leading voice · The moment · Memorable detail · Hypothesis first reaction · Where the hypothesis fails · Least convinced audience · Their objection · PUF described · PUF authority and risk · Two brands to One brand · What keeps a member · What would feel like being dropped · What would feel like inclusion · Research that changed a decision · The one argument · Serving members to Shaping sector · Reporting to Driving · Membership org to Institution · Understood to Not understood · Following to Setting agenda · Words for SEPA today · Three words future · Member meeting feeling · Regulator meeting feeling · Journalist meeting feeling · What is different · What didn't we ask
+Vantage point · SEPA is a · What SEPA does · What would be lost · What SEPA does differently · Wish sentence · Reality sentence · What audiences should understand · Words that make them wince · What they say instead · What the name has earned · What the name has cost · One thing that survives a rename · Keep name to New name · What neutrality earns · Leading versus neutrality · Neutral convener to Leading voice · The moment · Hypothesis first reaction · Where the hypothesis fails · Least convinced audience · Their objection · PUF described · PUF authority and risk · Two brands to One brand · What keeps a member · What would feel like being dropped · What would feel like inclusion · Research that changed a decision · The one argument · Serving members to Shaping sector · Reporting to Driving · Membership org to Institution · Following to Setting agenda · Words for SEPA today · Three words future · Member meeting feeling · Regulator meeting feeling · Journalist meeting feeling · What didn't we ask
 
-That is 44 answer columns plus 5 metadata columns, 49 in total. The exact mapping lives in `HEADLINE_FIELDS` in `lib/smartsheet.js`.
+That is 40 answer columns plus 5 metadata columns, 45 in total. The exact mapping lives in `HEADLINE_FIELDS` in `lib/smartsheet.js`.
 
 ### Getting the token and sheet id
 
@@ -109,6 +109,9 @@ The instruments in here were chosen to make divergence visible rather than to pr
 ## Data handling
 
 - Drafts save to the respondent's localStorage on every keystroke, debounced 600ms. On submit the draft is cleared and a flag is set in sessionStorage.
+- Respondents can leave and return. "Save and finish later" flushes the draft immediately and shows a confirmation screen; on their next visit the welcome screen recognises the draft, reports how far through they are, and changes the button to Continue.
+- This resume is per browser and per device, because the draft lives in localStorage. Someone who starts on a laptop cannot finish on a phone. True cross-device resume would need server-side storage keyed to a token, which is a bigger change than it sounds and is not built.
+- Identifying is optional. Name, role and organization can all be left blank. Vantage point in section 01 is the required segmentation variable, so an anonymous response is still analytically useful.
 - That flag means someone who submits and then refreshes sees the thank-you page until they clear sessionStorage or open a new browser session.
 - There is no admin view. Review responses in Smartsheet.
 
