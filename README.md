@@ -1,5 +1,54 @@
 # SEPA Brand Foundation Study
 
+## Two audiences, two builds
+
+This repo produces two sites from one codebase:
+
+- **Internal** — SEPA staff, leadership, board, PUF editorial and commercial.
+- **External** — members, partners, regulators, PUF readers, sector observers.
+
+External respondents must never see internal questions. That is enforced at compile time, not in the browser. `scripts/build-questions.mjs` runs before every build and writes exactly one audience's schema to `lib/questions.generated.js`; the app imports only that file. The other audience's questions are never bundled, so they are absent from the JavaScript, the DOM, and view-source. Runtime branching would have left them readable in dev tools, which is why it is not used.
+
+```bash
+npm run build:internal   # AUDIENCE=internal
+npm run build:external   # AUDIENCE=external
+AUDIENCE=internal npm run dev
+```
+
+`AUDIENCE` defaults to `external` if unset, so an accidental build fails safe.
+
+**Deploy as two Vercel projects from the same repo**, each with its own `AUDIENCE` environment variable and its own password. Two URLs also let you see which audience a response came from without relying on self-reporting.
+
+To verify the separation after a build:
+
+```bash
+grep -rl "renewal-deck" .next/static | wc -l   # 0 on an external build
+```
+
+### What each audience gets
+
+The spine is identical in both, word for word, because the highest-value finding in the study is where insiders and outsiders diverge on the same question. That comparison collapses if the wording drifts.
+
+| | Internal | External |
+| --- | --- | --- |
+| Spine (what SEPA does, what would be lost, differentiator, wish/reality sentence, wince words, name equity, hypothesis, spectrums, word bank) | Yes | Yes |
+| Where the name has cost you | Yes | No |
+| What you add when explaining the name | No | Yes |
+| Neutrality: what it earns | Yes | Yes |
+| Neutrality: where the line sits, who decides | Yes | No |
+| PUF architecture, authority, two-brand spectrum | Yes | No |
+| PUF readership and what not to change | No | Yes |
+| Membership module (renewals, what members would notice) | Yes | No |
+| Why they joined, what nearly stopped them, where else they turn | No | Yes |
+| Research and influence module | Yes | No |
+| Walking into rooms | Yes | No |
+| What would make them recommend SEPA | No | Yes |
+
+### Disclosure level
+
+The external build states that a rebrand is underway and a change of name is under consideration, with no decision made. It does not reveal brand architecture options, internal governance, or commercial arrangements. If that position changes, the copy to edit is the `nameSection` blurb in `lib/questions/shared.js` and the welcome text in `components/Questionnaire.js`.
+
+
 A private, password-protected questionnaire built for Antenna Group's SEPA engagement. It widens the input base for Phase 1 Diagnose beyond the individual interviews. Next.js and Tailwind, deploys to Vercel, writes responses to Smartsheet.
 
 ## What it does
@@ -49,7 +98,7 @@ The target Smartsheet is created and configured. No Smartsheet setup work remain
 - **Workspace:** CLIENT SURVEYS
 - **Direct link:** https://app.smartsheet.com/sheets/j5rhVxW4jmQWcgFH4vH8q8rJQVpg7hH56cXQF7J1
 
-All 45 columns are in place with the exact names this code expects: 4 metadata, 40 answer columns, and 1 catch-all JSON column. Respondent Name is the primary column, which is what the welcome-screen response counter reads. Identifying is optional for respondents, so when the name field is left blank the API writes "Anonymous" into that column rather than an empty cell, which keeps the counter accurate. The section below is kept for reference, or for building a second sheet.
+All columns are in place with the exact names this code expects: 4 metadata, 40 answer columns, and 1 catch-all JSON column. Respondent Name is the primary column, which is what the welcome-screen response counter reads. Identifying is optional for respondents, so when the name field is left blank the API writes "Anonymous" into that column rather than an empty cell, which keeps the counter accurate. The section below is kept for reference, or for building a second sheet.
 
 ## Smartsheet setup
 

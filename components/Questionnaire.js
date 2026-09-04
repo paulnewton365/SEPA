@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { sections } from "../lib/questions";
+import { sections, AUDIENCE } from "../lib/questions";
 import Header from "./Header";
 import ProgressRail from "./ProgressRail";
 import QuestionBlock from "./QuestionBlock";
@@ -561,28 +561,52 @@ function Welcome({ onBegin, hasDraft, percentComplete }) {
         </p>
 
         <h1 className="font-display text-4xl md:text-6xl tracking-tightish text-ink leading-[1.02] mb-8 reveal reveal-delay-2 text-balance">
-          How you say it matters as much as what you say.
+          {AUDIENCE === "internal" ? "How you say it matters as much as what you say." : "Tell us what SEPA is, in your words."}
         </h1>
 
         <div className="space-y-3 text-ink-soft text-sm leading-relaxed max-w-[72ch] text-pretty reveal reveal-delay-3">
           <p>
-            Antenna Group is working with SEPA on a rebrand, a new brand
-            foundation, and a redesign of both the SEPA and PUF websites.
-            Before we put more language on paper, we want to ground the work
-            in how the people closest to SEPA describe it: what it does, what
-            would be lost without it, where the name helps and where it gets
-            in the way, and what neutrality is really worth.
+            {AUDIENCE === "internal" ? (
+              <>
+                Antenna Group is working with SEPA on a rebrand, a new brand
+                foundation, and a redesign of both the SEPA and PUF websites.
+                Before we put more language on paper, we want to ground the
+                work in how the people closest to SEPA describe it: what it
+                does, what would be lost without it, where the name helps and
+                where it gets in the way, and what neutrality is really worth.
+              </>
+            ) : (
+              <>
+                SEPA has asked Antenna Group, a brand and communications
+                agency, to help refresh how it presents itself: a new brand
+                foundation, and a redesign of the SEPA and PUF websites. A
+                change of name is under consideration, though no decision has
+                been made. Your view carries weight in that.
+              </>
+            )}
           </p>
           <p>
-            We are listening as much for phrasing as for content. Two people
-            can agree completely on what SEPA does and describe it in words
-            that would build different organizations. So write the way you
-            speak. Where you disagree with the conventional view, say so.
-            Rough and true beats polished and general.
+            {AUDIENCE === "internal" ? (
+              <>
+                We are listening as much for phrasing as for content. Two
+                people can agree completely on what SEPA does and describe it
+                in words that would build different organizations. So write
+                the way you speak. Where you disagree with the conventional
+                view, say so. Rough and true beats polished and general.
+              </>
+            ) : (
+              <>
+                We are listening as much for phrasing as for content, so write
+                the way you speak rather than the way you would write for
+                publication. Criticism is more useful to us than approval, and
+                nothing you say here will get back to anyone by name.
+              </>
+            )}
           </p>
           <p>
-            Responses go to the Antenna Group strategy team and feed straight
-            into the Diagnose findings. Identifying yourself is optional.
+            {AUDIENCE === "internal"
+              ? "Responses go to the Antenna Group strategy team and feed straight into the Diagnose findings. Identifying yourself is optional."
+              : "Responses go to the Antenna Group strategy team, not to SEPA staff as a list of who said what. Identifying yourself is optional."}
           </p>
           <p>
             You can stop and come back. Your answers save automatically as you

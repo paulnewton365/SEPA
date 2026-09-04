@@ -17,10 +17,62 @@ const sans = Inter({
   display: "swap",
 });
 
+// Absolute URL for social previews. Teams, Slack, LinkedIn and iMessage
+// all require an absolute og:image URL, so metadataBase has to resolve to
+// the real deployment. Set NEXT_PUBLIC_SITE_URL to the production domain;
+// VERCEL_URL covers preview deployments automatically.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+  "http://localhost:3000";
+
+const title = "SEPA Brand Foundation Study";
+const description =
+  "A short set of questions on the SEPA and PUF brands, ahead of the rebrand and website redesign. Around 12 minutes.";
+
 export const metadata = {
-  title: "SEPA Brand Foundation Study | Antenna Group",
-  description:
-    "A short, considered set of questions on the SEPA and PUF brands, conducted by Antenna Group.",
+  metadataBase: new URL(siteUrl),
+  // This is a private research instrument, not a public page. noindex is
+  // the mechanism that actually keeps it out of search results, and it is
+  // honored by Google and Bing. Note that it does not affect link
+  // unfurling: Teams, Slack and Outlook read og: tags regardless, which is
+  // what we want.
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+      "max-snippet": -1,
+      "max-image-preview": "none",
+      "max-video-preview": -1,
+    },
+  },
+  title: `${title} | Antenna Group`,
+  description,
+  openGraph: {
+    type: "website",
+    siteName: "Antenna Group",
+    title,
+    description,
+    url: "/",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "SEPA Brand Foundation Study, by Antenna Group",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: ["/og.png"],
+  },
   icons: {
     icon: [
       { url: "https://www.antennagroup.com/favicon.ico" },
