@@ -22,6 +22,6 @@ export default function robots() {
         disallow: ["/api/"],
       },
     ],
-    host: process.env.NEXT_PUBLIC_SITE_URL || undefined,
+    host: process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || undefined,
   };
 }

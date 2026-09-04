@@ -19,9 +19,18 @@ const sans = Inter({
 
 // Absolute URL for social previews. Teams, Slack, LinkedIn and iMessage
 // all require an absolute og:image URL, so metadataBase has to resolve to
-// the real deployment. Set NEXT_PUBLIC_SITE_URL to the production domain;
-// VERCEL_URL covers preview deployments automatically.
+// the real deployment.
+//
+// No NEXT_PUBLIC_ prefix: this file is a Server Component and metadata is
+// generated on the server, so the value is never needed in the browser.
+// The prefix would inline it into the client bundle for no reason. The
+// URL itself is not secret, but unnecessary exposure is still a habit
+// worth avoiding.
+//
+// Set SITE_URL to the production domain. VERCEL_URL covers preview
+// deployments automatically.
 const siteUrl =
+  process.env.SITE_URL ||
   process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
   "http://localhost:3000";

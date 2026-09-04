@@ -1,5 +1,7 @@
 "use client";
 
+import { AUDIENCE } from "../lib/questions";
+
 export default function Header({ saved, percentComplete = 0 }) {
   return (
     <header className="border-b border-rule bg-paper/85 backdrop-blur-md sticky top-0 z-30">

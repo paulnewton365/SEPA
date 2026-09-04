@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { AUDIENCE } from "../lib/questions";
 
 const STORAGE_KEY = "sepa_q_auth";
 const PASSWORD = "antennagroup";
@@ -72,19 +73,33 @@ export default function PasswordGate({ children }) {
           </p>
         </div>
 
-        <p className="font-sans font-semibold text-[11px] uppercase tracking-[0.22em] text-accent mb-5 reveal reveal-delay-2">
-          SEPA &nbsp;/&nbsp; Brand Foundation Study
-        </p>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-5 reveal reveal-delay-2">
+          <p className="font-sans font-semibold text-[11px] uppercase tracking-[0.22em] text-accent">
+            SEPA &nbsp;/&nbsp; Brand Foundation Study
+          </p>
+          <span
+            className={`font-sans font-semibold text-[10px] uppercase tracking-[0.18em] px-2.5 py-1 rounded-sm border ${
+              AUDIENCE === "internal"
+                ? "border-ink text-ink bg-ink/[0.04]"
+                : "border-rule text-ink-soft bg-paper-tint/60"
+            }`}
+          >
+            {AUDIENCE === "internal"
+              ? "Internal edition"
+              : "Member and partner edition"}
+          </span>
+        </div>
 
         <h1 className="font-display text-4xl md:text-5xl tracking-tightish text-ink leading-[1.05] mb-5 reveal reveal-delay-2 text-balance">
           We want to hear it in your words.
         </h1>
 
         <p className="text-ink-soft text-sm leading-relaxed mb-8 max-w-[72ch] text-pretty reveal reveal-delay-3">
-          A private workspace for SEPA, PUF, and selected members. Enter the
-          password to begin. Your progress saves automatically, but only in
-          this browser on this device, so start on the machine you intend to
-          finish on.
+          {AUDIENCE === "internal"
+            ? "A private workspace for SEPA staff, leadership, board, and the PUF team. This version includes questions intended for people inside the organization, so it should not be forwarded outside it. Members, partners and readers have a separate link."
+            : "A private workspace for SEPA members, partners, PUF readers, and others across the sector. Enter the password to begin."}{" "}
+          Your progress saves automatically, but only in this browser on this
+          device, so start on the machine you intend to finish on.
         </p>
 
         <form
