@@ -279,7 +279,15 @@ export default function Questionnaire() {
       const res = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers, submittedAt: new Date().toISOString() }),
+        body: JSON.stringify({
+          answers,
+          // Reported by the build that actually served these questions, so
+          // the Smartsheet stamp can never disagree with what the
+          // respondent saw. Deriving it server-side alone allowed the two
+          // to drift.
+          audience: AUDIENCE,
+          submittedAt: new Date().toISOString(),
+        }),
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));

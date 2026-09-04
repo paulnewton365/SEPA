@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { answers, submittedAt } = body || {};
+    const { answers, submittedAt, audience } = body || {};
 
     if (!answers || typeof answers !== "object") {
       return NextResponse.json(
@@ -17,6 +17,7 @@ export async function POST(request) {
 
     const result = await submitToSmartsheet({
       answers,
+      audience,
       submittedAt: submittedAt || new Date().toISOString(),
     });
 
