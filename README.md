@@ -133,11 +133,22 @@ That is 40 answer columns plus 5 metadata columns, 45 in total. The exact mappin
 3. Under Environment Variables set `SMARTSHEET_API_TOKEN` and `SMARTSHEET_SHEET_ID`.
 4. Deploy. Default settings work, no extra build configuration needed.
 
-## Changing the password
+## Passwords
 
-The shared phrase lives in `components/PasswordGate.js`, in the `PASSWORD` constant. Change it and redeploy.
+Each audience has its own:
 
-This is a soft gate, not a security boundary. The password sits in client-side code and anyone who reads the source can find it. It keeps casual visitors out. Don't put anything genuinely confidential behind it.
+| Build | Password |
+| --- | --- |
+| internal | `antennagroup` |
+| external | `externalview` |
+
+They are resolved in `scripts/build-questions.mjs` at build time and written into the generated file, so each bundle contains only its own. A lookup map inside the app would have compiled both into both bundles, putting the internal password in the external site's source. Verify after a build with `grep -ro '"antennagroup"' .next/static | wc -l`, which should return 0 on an external build. Note that `antennagroup` also appears as a domain in the footer link and contact email, so grep for the quoted string rather than the bare word.
+
+To rotate without a code change, set `INTERNAL_PASSWORD` or `EXTERNAL_PASSWORD` in that project's Vercel environment variables and redeploy without the build cache.
+
+The session key is namespaced per audience, so unlocking one deployment in a browser does not unlock the other.
+
+This is still a soft gate, not a security boundary. The password reaches the browser and anyone who reads the source of that site can find it. It keeps casual visitors out. For anything stronger, use Vercel Deployment Protection.
 
 ## Editing questions
 

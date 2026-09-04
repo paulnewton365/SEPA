@@ -25,6 +25,23 @@ if (!["internal", "external"].includes(audience)) {
   process.exit(1);
 }
 
+// Per-audience password.
+//
+// Resolved here, at build time, rather than in a lookup map inside the
+// app. A map would compile BOTH passwords into BOTH bundles, which would
+// put the internal password in the external site's JavaScript for anyone
+// to read. Writing only the active one into the generated file means each
+// deployment ships only its own.
+//
+// Override either with an env var if you rotate them without a code
+// change: INTERNAL_PASSWORD / EXTERNAL_PASSWORD.
+const PASSWORDS = {
+  internal: process.env.INTERNAL_PASSWORD || "antennagroup",
+  external: process.env.EXTERNAL_PASSWORD || "externalview",
+};
+
+const password = PASSWORDS[audience];
+
 const out = resolve(__dirname, "../lib/questions.generated.js");
 
 const contents = `// GENERATED FILE. DO NOT EDIT AND DO NOT COMMIT.
@@ -36,6 +53,7 @@ import { sections } from "./questions/${audience}.js";
 
 export { sections };
 export const AUDIENCE = ${JSON.stringify(audience)};
+export const PASSWORD = ${JSON.stringify(password)};
 
 export function getAllFieldIds() {
   const ids = [];
@@ -49,4 +67,9 @@ export function getAllFieldIds() {
 `;
 
 writeFileSync(out, contents, "utf8");
-console.log(`[questions] built schema for audience: ${audience}`);
+console.log(
+  `[questions] built schema for audience: ${audience} (gate: ${password.slice(
+    0,
+    3
+  )}${"*".repeat(Math.max(password.length - 3, 0))})`
+);

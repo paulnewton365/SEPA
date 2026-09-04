@@ -1,10 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AUDIENCE } from "../lib/questions";
+import { AUDIENCE, PASSWORD } from "../lib/questions";
 
-const STORAGE_KEY = "sepa_q_auth";
-const PASSWORD = "antennagroup";
+// Auth key is namespaced per audience so unlocking one deployment does
+// not carry over to the other in the same browser.
+const STORAGE_KEY = `sepa_q_auth_${AUDIENCE}`;
+
+// PASSWORD is injected at build time by scripts/build-questions.mjs, so
+// each bundle contains only its own. See that file for why.
 
 export default function PasswordGate({ children }) {
   const [unlocked, setUnlocked] = useState(false);

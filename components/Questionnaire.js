@@ -225,6 +225,19 @@ export default function Questionnaire() {
     }
   }
 
+  function handleClearDraft() {
+    // Restored drafts are the right default, but someone testing the form,
+    // or sharing a machine, needs a way to wipe the slate. Without this the
+    // only route is clearing site data in browser settings.
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
+    setAnswers({});
+    setHasDraft(false);
+    setSaved(false);
+  }
+
   function handleSaveForLater() {
     // The debounced autosave may still be pending, so flush it now
     // rather than relying on the timer to fire before they navigate away.
@@ -306,6 +319,7 @@ export default function Questionnaire() {
         onBegin={() => setShowForm(true)}
         hasDraft={hasDraft}
         percentComplete={percentComplete}
+        onClearDraft={handleClearDraft}
       />
     );
   }
@@ -508,7 +522,7 @@ export default function Questionnaire() {
   );
 }
 
-function Welcome({ onBegin, hasDraft, percentComplete }) {
+function Welcome({ onBegin, hasDraft, percentComplete, onClearDraft }) {
   const [count, setCount] = useState(null);
 
   useEffect(() => {
@@ -644,6 +658,13 @@ function Welcome({ onBegin, hasDraft, percentComplete }) {
                   : ""}
                 . Pick up where you left off.
               </p>
+              <button
+                type="button"
+                onClick={onClearDraft}
+                className="mt-3 font-sans text-xs text-ink-muted hover:text-ink underline decoration-rule underline-offset-4 hover:decoration-ink transition-colors"
+              >
+                Not yours, or want a clean start? Clear these answers
+              </button>
             </div>
           ) : (
             <CountIndicator count={count} />
